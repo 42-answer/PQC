@@ -110,89 +110,449 @@ Comprehensive performance measurement:
 
 ---
 
-## 🚀 Quick Start
+## 🚀 Quick Start for Judges - Complete Guide
 
 ### Prerequisites
-- **Python 3.8+**
+- **Python 3.8+** (verified with Python 3.12.3)
 - **liboqs** (Open Quantum Safe library)
 - **Linux/macOS** (tested on Ubuntu 20.04+)
+- **Internet connection** (for initial setup only)
 
-### Installation
+---
 
-#### 1. Install liboqs (Required)
-```bash
-# Ubuntu/Debian
-sudo apt-get update
-sudo apt-get install -y astyle cmake gcc ninja-build libssl-dev \
-    python3-pytest python3-pytest-xdist unzip xsltproc doxygen \
-    graphviz python3-yaml valgrind
+## 📋 OPTION 1: Fast Setup (If liboqs Already Installed)
 
-# Clone and build liboqs
-git clone -b main https://github.com/open-quantum-safe/liboqs.git
-cd liboqs
-mkdir build && cd build
-cmake -GNinja -DCMAKE_INSTALL_PREFIX=/usr/local ..
-ninja
-sudo ninja install
-sudo ldconfig  # Update library cache
-cd ../..
-```
+If you already have liboqs installed, jump straight to running:
 
-#### 2. Setup Project
 ```bash
 # Clone repository
-git clone <your-repo-url>
+git clone https://github.com/42-answer/PQC.git
 cd PQC
 
-# Setup environment and install dependencies
+# Setup environment
 source setup_env.sh
-```
 
-This will:
-- Set `LD_LIBRARY_PATH` for liboqs
-- Set `PYTHONPATH` for project modules
-- Install Python dependencies from `requirements.txt`
-
-### ⚡ Running Demos
-
-#### Option 1: Interactive Web UI (Recommended)
-```bash
-# Start UI server
-python ui/app.py
-
-# Open browser to http://localhost:5000
-# Try the interactive demos:
-#  - KEMTLS Handshake
-#  - Digital Signatures
-#  - JWT Creation
-#  - Complete OIDC Flow
-#  - View Benchmarks
-```
-
-#### Option 2: Command-Line Demos
-```bash
-# Test cryptographic operations
-python -m src.pq_crypto.test_crypto
-
-# Full OIDC authentication flow
-python -m examples.demo_flow
-
-# KEMTLS network demo
-python -m examples.kemtls_network_demo
-
-# Run comprehensive benchmarks
-python -m src.benchmarks.run_benchmarks
-```
-
-#### Option 3: Run Tests
-```bash
-# Run all unit and integration tests (20 test cases)
-python -m tests.test_all
+# You're ready! Jump to "Running Options" section below
 ```
 
 ---
 
-## 📊 Performance Results
+## 📋 OPTION 2: Complete Setup (First Time Installation)
+
+### Step 1: Install liboqs (One-time setup)
+
+**Copy and paste these commands:**
+
+```bash
+# Install dependencies
+sudo apt-get update
+sudo apt-get install -y astyle cmake gcc ninja-build libssl-dev \
+    python3-pytest python3-pytest-xdist unzip xsltproc doxygen \
+    graphviz python3-yaml valgrind python3-pip
+
+# Clone liboqs
+git clone -b main https://github.com/open-quantum-safe/liboqs.git
+cd liboqs
+
+# Build and install
+mkdir build && cd build
+cmake -GNinja -DCMAKE_INSTALL_PREFIX=/usr/local ..
+ninja
+sudo ninja install
+sudo ldconfig
+
+# Return to home directory
+cd ~
+```
+
+### Step 2: Setup Project
+
+**Copy and paste these commands:**
+
+```bash
+# Clone the project repository
+git clone https://github.com/42-answer/PQC.git
+cd PQC
+
+# Setup environment and install Python dependencies
+source setup_env.sh
+```
+
+**What this does:**
+- Sets `LD_LIBRARY_PATH` for liboqs
+- Sets `PYTHONPATH` for project modules
+- Creates Python virtual environment
+- Installs all required Python packages (Flask, matplotlib, etc.)
+
+---
+
+## 🎮 Running the Project - All Options
+
+### ⭐ OPTION A: Interactive Web UI (Recommended - Best for Judges)
+
+**Start the web interface with live demonstrations:**
+
+```bash
+cd ~/PQC
+source setup_env.sh
+python ui/app.py
+```
+
+Then open your browser to: **http://localhost:5000**
+
+**Available Interactive Demos:**
+1. **Dashboard** - Project overview and quick links
+2. **KEMTLS Handshake** - Live handshake demonstration with timing
+3. **Digital Signatures** - Test all PQ signature algorithms (ML-DSA, Falcon)
+4. **JWT Operations** - Create and verify PQ-signed JWTs
+5. **Complete OIDC Flow** - End-to-end authentication demonstration
+6. **Benchmarks** - View all performance data interactively
+7. **Architecture** - System design visualization
+
+**All operations run live with real cryptography!**
+
+---
+
+### 🧪 OPTION B: Run All Tests (Verify Everything Works)
+
+**Test all cryptographic operations:**
+
+```bash
+cd ~/PQC
+source setup_env.sh
+python src/pq_crypto/test_crypto.py
+```
+
+**Expected output:** ✓ ALL POST-QUANTUM CRYPTOGRAPHY TESTS PASSED!
+
+**This tests:**
+- ✅ Kyber KEM (3 variants: 512/768/1024)
+- ✅ ML-DSA Signatures (3 variants: 44/65/87)
+- ✅ Falcon Signatures (2 variants: 512/1024)
+- ✅ Key generation, encryption/signing, decryption/verification
+- ✅ Error handling for invalid signatures
+
+---
+
+### 📊 OPTION C: Generate Fresh Benchmark Data
+
+**Run complete performance benchmarks (32 operations):**
+
+```bash
+cd ~/PQC
+source setup_env.sh
+python -m src.benchmarks.run_benchmarks
+```
+
+**What this does:**
+- Benchmarks 9 KEM operations (Kyber 512/768/1024)
+- Benchmarks 15 signature operations (ML-DSA + Falcon, all variants)
+- Benchmarks 6 JWT operations (create/verify with different algorithms)
+- Benchmarks complete KEMTLS handshake
+- Benchmarks end-to-end OIDC authentication flow
+- Runs 100 iterations per operation for statistical accuracy
+- Saves results to `benchmark_results/` directory
+
+**Generated files:**
+- `benchmark_results/benchmark_results.json` (raw data)
+- `benchmark_results/benchmark_results.csv` (spreadsheet format)
+
+**Time:** ~30-60 seconds
+
+---
+
+### 📈 OPTION D: Generate Benchmark PDF Report
+
+**Create visual performance report with graphs:**
+
+```bash
+cd ~/PQC
+source setup_env.sh
+python -m src.benchmarks.generate_pdf_report
+```
+
+**What this creates:**
+- `BenchmarkResults.pdf` (10-page report)
+  - Performance comparison graphs
+  - Statistical tables
+  - Analysis and recommendations
+  - Algorithm comparison charts
+
+**Prerequisites:** Benchmark data must exist (run Option C first if needed)
+
+**Time:** ~5-10 seconds
+
+---
+
+### 🎯 OPTION E: Individual Demo Scripts
+
+**Run specific demonstrations:**
+
+#### 1. **Complete OIDC Authentication Flow**
+```bash
+cd ~/PQC
+source setup_env.sh
+python examples/demo_full_flow.py
+```
+Shows complete OAuth 2.0 authorization code flow with PQ cryptography.
+
+#### 2. **KEMTLS Network Handshake**
+```bash
+cd ~/PQC
+source setup_env.sh
+python examples/kemtls_network_demo.py
+```
+Demonstrates client-server KEMTLS handshake with session establishment.
+
+#### 3. **Interactive Command-Line Demo**
+```bash
+cd ~/PQC
+source setup_env.sh
+python examples/interactive_demo.py
+```
+Step-by-step menu-driven demo of all features.
+
+#### 4. **Quick Feature Test**
+```bash
+cd ~/PQC
+source setup_env.sh
+python examples/quick_test.py
+```
+Rapid test of all major components (< 5 seconds).
+
+---
+
+### 🔬 OPTION F: Test UI Endpoints (Verify Web API)
+
+**Test all Flask API endpoints:**
+
+```bash
+cd ~/PQC
+source setup_env.sh
+
+# In terminal 1: Start UI server
+python ui/app.py
+
+# In terminal 2: Run endpoint tests
+python test_ui_endpoints.py
+```
+
+**What this tests:**
+- JWT creation API
+- OIDC flow API
+- Signature testing API
+- KEMTLS handshake API
+- All REST endpoints return valid JSON
+
+---
+
+### 📖 OPTION G: View Existing Benchmark Data
+
+**See pre-generated performance results without re-running:**
+
+#### View JSON data:
+```bash
+cd ~/PQC
+cat benchmark_results/benchmark_results.json | python -m json.tool | less
+```
+
+#### View CSV data:
+```bash
+cd ~/PQC
+column -t -s, benchmark_results/benchmark_results.csv | less
+```
+
+#### View PDF report:
+```bash
+cd ~/PQC
+xdg-open BenchmarkResults.pdf
+# Or: evince BenchmarkResults.pdf
+# Or: open BenchmarkResults.pdf  (macOS)
+```
+
+---
+
+## 🎬 OPTION H: Complete Demonstration Sequence
+
+**Run everything in order (recommended for thorough evaluation):**
+
+```bash
+cd ~/PQC
+source setup_env.sh
+
+# 1. Verify installation with tests
+echo "=== Step 1: Running Tests ==="
+python src/pq_crypto/test_crypto.py
+
+# 2. Generate fresh benchmark data
+echo -e "\n=== Step 2: Running Benchmarks ==="
+python -m src.benchmarks.run_benchmarks
+
+# 3. Generate PDF report
+echo -e "\n=== Step 3: Generating PDF Report ==="
+python -m src.benchmarks.generate_pdf_report
+
+# 4. Run quick demo
+echo -e "\n=== Step 4: Quick Feature Demo ==="
+python examples/quick_test.py
+
+# 5. Show benchmark summary
+echo -e "\n=== Step 5: Performance Summary ==="
+echo "KEMTLS Handshake: $(grep 'Full KEMTLS Handshake' benchmark_results/benchmark_results.csv | cut -d',' -f3) ms"
+echo "Complete OIDC Flow: $(grep 'End-to-End OIDC Flow' benchmark_results/benchmark_results.csv | cut -d',' -f3) ms"
+
+# 6. Start interactive UI
+echo -e "\n=== Step 6: Starting Web UI ==="
+echo "Open http://localhost:5000 in your browser"
+python ui/app.py
+```
+
+**Total time:** ~2-3 minutes + interactive exploration
+
+---
+
+## 📁 Where to Find Generated Data
+
+After running benchmarks and tests, find results here:
+
+```bash
+cd ~/PQC
+
+# Benchmark results (raw data)
+ls -lh benchmark_results/
+# → benchmark_results.json (detailed timing data)
+# → benchmark_results.csv (spreadsheet format)
+
+# PDF report (visual analysis)
+ls -lh BenchmarkResults.pdf
+# → 10-page report with graphs and tables
+
+# Technical documentation
+ls -lh TechnicalDocumentation.md
+# → 8,500-word comprehensive guide
+
+# Project overview
+ls -lh README.md
+# → This file
+```
+
+---
+
+## 🆘 Troubleshooting
+
+### Issue: "liboqs not found"
+```bash
+# Solution: Set library path
+export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
+# Or re-run: source setup_env.sh
+```
+
+### Issue: "Module not found"
+```bash
+# Solution: Set Python path
+export PYTHONPATH=/home/aniket/PQC:$PYTHONPATH
+# Or re-run: source setup_env.sh
+```
+
+### Issue: "Flask not installed"
+```bash
+# Solution: Install dependencies
+pip install -r requirements.txt
+```
+
+### Issue: "Permission denied"
+```bash
+# Solution: Use sudo for system installs
+sudo ninja install  # For liboqs
+sudo ldconfig       # Update library cache
+```
+
+### Issue: Port 5000 already in use
+```bash
+# Solution: Use different port
+python ui/app.py --port 5001
+# Then open: http://localhost:5001
+```
+
+---
+
+## ⚡ Quick Command Reference
+
+**One-liner to run UI:**
+```bash
+cd ~/PQC && source setup_env.sh && python ui/app.py
+```
+
+**One-liner to run tests:**
+```bash
+cd ~/PQC && source setup_env.sh && python src/pq_crypto/test_crypto.py
+```
+
+**One-liner to generate benchmarks:**
+```bash
+cd ~/PQC && source setup_env.sh && python -m src.benchmarks.run_benchmarks && python -m src.benchmarks.generate_pdf_report
+```
+
+**One-liner to see project structure:**
+```bash
+cd ~/PQC && tree -L 2 -I 'venv|__pycache__|.git'
+```
+
+---
+
+## � Quick Summary for Judges
+
+### Fastest Way to See Everything:
+
+**1. Start Web UI (30 seconds):**
+```bash
+cd ~/PQC && source setup_env.sh && python ui/app.py
+```
+Open http://localhost:5000 - See all features interactively!
+
+**2. Generate Everything (2 minutes):**
+```bash
+cd ~/PQC && source setup_env.sh
+python src/pq_crypto/test_crypto.py              # Run tests
+python -m src.benchmarks.run_benchmarks          # Generate data
+python -m src.benchmarks.generate_pdf_report     # Create PDF
+```
+
+**3. View Results:**
+- **Web UI**: http://localhost:5000 (live demos)
+- **PDF Report**: `BenchmarkResults.pdf` (graphs + analysis)
+- **Raw Data**: `benchmark_results/*.json` and `*.csv`
+- **Technical Doc**: `TechnicalDocumentation.md` (8,500 words)
+
+### What Each Option Does:
+
+| Option | Purpose | Time | Command |
+|--------|---------|------|---------|
+| **A - Web UI** | Interactive demos | 30 sec | `python ui/app.py` |
+| **B - Tests** | Verify all crypto works | 10 sec | `python src/pq_crypto/test_crypto.py` |
+| **C - Benchmarks** | Generate performance data | 60 sec | `python -m src.benchmarks.run_benchmarks` |
+| **D - PDF Report** | Create visual report | 10 sec | `python -m src.benchmarks.generate_pdf_report` |
+| **E - Demos** | Individual feature demos | 5-20 sec | `python examples/*.py` |
+| **F - API Tests** | Test web endpoints | 10 sec | `python test_ui_endpoints.py` |
+| **G - View Data** | See existing results | Instant | `cat benchmark_results/*.json` |
+| **H - Complete** | Everything in sequence | 3 min | See Option H above |
+
+### Deliverables Location:
+
+```
+📁 PQC/
+  ├── 📄 README.md                      ← You are here
+  ├── 📄 TechnicalDocumentation.md      ← Full technical guide (8,500 words)
+  ├── 📊 BenchmarkResults.pdf           ← Performance report with graphs
+  ├── 📂 src/                           ← Source code (4,583 lines)
+  ├── 🌐 ui/                            ← Interactive web interface
+  ├── 📈 benchmark_results/             ← Raw performance data (JSON/CSV)
+  └── 🧪 examples/                      ← Demo scripts
+```
+
+---
+
+## �📊 Performance Results
 
 Based on 100 iterations per operation (latest benchmark run):
 
