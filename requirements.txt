@@ -1,5 +1,5 @@
 # Core cryptography
-liboqs-python==0.10.1
+liboqs-python>=0.14.0
 
 # Web framework for OIDC server
 Flask==3.0.0
