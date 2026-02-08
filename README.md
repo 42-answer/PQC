@@ -110,79 +110,135 @@ Comprehensive performance measurement:
 
 ---
 
-## 🚀 Quick Start for Judges - Complete Guide
+## 🚀 Complete Setup Instructions
 
 ### Prerequisites
-- **Python 3.8+** (verified with Python 3.12.3)
-- **liboqs** (Open Quantum Safe library)
+- **Python 3.8+** (check with `python3 --version`)
 - **Linux/macOS** (tested on Ubuntu 20.04+)
-- **Internet connection** (for initial setup only)
+- **Internet connection** (for initial setup)
 
 ---
 
-## 📋 OPTION 1: Fast Setup (If liboqs Already Installed)
+### Step 1: Install System Dependencies & liboqs
 
-If you already have liboqs installed, jump straight to running:
-
-```bash
-# Clone repository
-git clone https://github.com/42-answer/PQC.git
-cd PQC
-
-# Setup environment
-source setup_env.sh
-
-# You're ready! Jump to "Running Options" section below
-```
-
----
-
-## 📋 OPTION 2: Complete Setup (First Time Installation)
-
-### Step 1: Install liboqs (One-time setup)
-
-**Copy and paste these commands:**
+Run these commands one by one (copy-paste):
 
 ```bash
-# Install dependencies
+# Update package manager
 sudo apt-get update
+
+# Install build dependencies
 sudo apt-get install -y astyle cmake gcc ninja-build libssl-dev \
     python3-pytest python3-pytest-xdist unzip xsltproc doxygen \
-    graphviz python3-yaml valgrind python3-pip
+    graphviz python3-yaml valgrind python3-pip python3-venv
 
-# Clone liboqs
+# Clone liboqs library
+cd ~
 git clone -b main https://github.com/open-quantum-safe/liboqs.git
 cd liboqs
 
-# Build and install
+# Build liboqs
 mkdir build && cd build
 cmake -GNinja -DCMAKE_INSTALL_PREFIX=/usr/local ..
 ninja
+
+# Install liboqs
 sudo ninja install
 sudo ldconfig
 
-# Return to home directory
-cd ~
+# Verify installation
+ls /usr/local/lib/liboqs*
+# Should show: /usr/local/lib/liboqs.so.5
 ```
 
-### Step 2: Setup Project
+**Expected result**: You should see `liboqs.so.5` file listed.
 
-**Copy and paste these commands:**
+---
+
+### Step 2: Clone and Setup This Project
 
 ```bash
-# Clone the project repository
+# Navigate to home directory
+cd ~
+
+# Clone the repository
 git clone https://github.com/42-answer/PQC.git
 cd PQC
 
-# Setup environment and install Python dependencies
+# Run automated setup (creates venv, installs dependencies)
 source setup_env.sh
 ```
 
 **What this does:**
-- Sets `LD_LIBRARY_PATH` for liboqs
-- Sets `PYTHONPATH` for project modules
-- Creates Python virtual environment
-- Installs all required Python packages (Flask, matplotlib, etc.)
+- ✅ Creates Python virtual environment (`venv/`)
+- ✅ Activates the virtual environment
+- ✅ Upgrades pip to latest version
+- ✅ Installs all Python dependencies from requirements.txt
+- ✅ Sets environment variables for liboqs
+
+**Expected output:**
+```
+Creating virtual environment...
+Upgrading pip...
+Installing Python dependencies...
+✓ Post-Quantum OIDC environment activated
+```
+
+---
+
+### Step 3: Verify Installation
+
+```bash
+# Test that liboqs-python is working
+python3 -c "import oqs; print('liboqs-python:', oqs.oqs_version())"
+
+# Expected output: liboqs-python: 0.11.0 (or similar)
+```
+
+If you see an error, check:
+- liboqs is installed: `ls /usr/local/lib/liboqs*`
+- Library path is set: `echo $LD_LIBRARY_PATH`
+- Run `sudo ldconfig` again
+
+---
+
+### Troubleshooting
+
+**Problem**: `ModuleNotFoundError: No module named 'oqs'`
+
+**Solution**:
+```bash
+cd ~/PQC
+source venv/bin/activate
+pip install --upgrade liboqs-python
+```
+
+**Problem**: `ImportError: liboqs.so.5: cannot open shared object file`
+
+**Solution**:
+```bash
+sudo ldconfig
+export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
+```
+
+**Problem**: `pip install` fails with dependency conflicts
+
+**Solution**:
+```bash
+cd ~/PQC
+rm -rf venv
+python3 -m venv venv
+source venv/bin/activate
+pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+---
+
+### Notes
+- **No .env file required** - All configuration is built-in
+- **Reactivation**: After closing terminal, run `source setup_env.sh` again
+- **Deactivation**: Run `deactivate` to exit virtual environment
 
 ---
 
