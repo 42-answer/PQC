@@ -158,10 +158,7 @@ ls /usr/local/lib/liboqs*
 ### Step 2: Clone and Setup This Project
 
 ```bash
-# Navigate to home directory
-cd ~
-
-# Clone the repository
+# Clone the repository (if not already cloned)
 git clone https://github.com/42-answer/PQC.git
 cd PQC
 
@@ -190,15 +187,16 @@ Installing Python dependencies...
 
 ```bash
 # Test that liboqs-python is working
-python3 -c "import oqs; print('liboqs-python:', oqs.oqs_version())"
+python -c "import oqs; print('liboqs-python:', oqs.oqs_version())"
 
-# Expected output: liboqs-python: 0.11.0 (or similar)
+# Expected output: liboqs-python: 0.14.0 or 0.15.0
 ```
 
 If you see an error, check:
-- liboqs is installed: `ls /usr/local/lib/liboqs*`
-- Library path is set: `echo $LD_LIBRARY_PATH`
-- Run `sudo ldconfig` again
+- **Codespaces**: liboqs is installed: `ls $HOME/.local/lib/liboqs*`
+- **Local machine**: liboqs is installed: `ls /usr/local/lib/liboqs*`
+- Library path is set: `echo $LD_LIBRARY_PATH` (should include `/usr/local/lib` or `$HOME/.local/lib`)
+- Re-run setup: `source setup_env.sh`
 
 ---
 
@@ -208,36 +206,45 @@ If you see an error, check:
 
 **Solution**:
 ```bash
-cd ~/PQC
-source venv/bin/activate
+source setup_env.sh
 pip install --upgrade liboqs-python
 ```
 
-**Problem**: `ImportError: liboqs.so.5: cannot open shared object file`
+**Problem**: `ImportError: liboqs.so: cannot open shared object file`
 
 **Solution**:
 ```bash
-sudo ldconfig
-export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
+# Re-run setup to set library path
+source setup_env.sh
+
+# Or manually set the path:
+export LD_LIBRARY_PATH=$HOME/.local/lib:/usr/local/lib:$LD_LIBRARY_PATH
 ```
 
 **Problem**: `pip install` fails with dependency conflicts
 
 **Solution**:
 ```bash
-cd ~/PQC
 rm -rf venv
 python3 -m venv venv
-source venv/bin/activate
-pip install --upgrade pip
-pip install -r requirements.txt
+source setup_env.sh
 ```
 
 ---
 
+### Quick Start (After Initial Setup)
+
+```bash
+cd PQC
+source setup_env.sh
+python ui/app.py
+```
+
+Then open your browser to `http://localhost:5000`
+
 ### Notes
 - **No .env file required** - All configuration is built-in
-- **Reactivation**: After closing terminal, run `source setup_env.sh` again
+- **Every session**: Run `source setup_env.sh` after opening the project
 - **Deactivation**: Run `deactivate` to exit virtual environment
 
 ---
@@ -249,7 +256,7 @@ pip install -r requirements.txt
 **Launch the web-based demonstration interface:**
 
 ```bash
-cd ~/PQC
+cd PQC
 source setup_env.sh
 python ui/app.py
 ```
