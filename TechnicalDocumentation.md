@@ -2,9 +2,9 @@
 ## Post-Quantum Secure OpenID Connect using KEMTLS
 
 **Project**: Post-Quantum OIDC with KEMTLS  
+**Team**: ByteBreachers  
 **Date**: February 8, 2026  
-**Version**: 1.0  
-**Authors**: PQC Project Team
+**Version**: 1.0
 
 ---
 
@@ -561,30 +561,30 @@ def benchmark_operation(operation, iterations=100):
 - **Token size**: 3.5 KB
 
 **Complete OIDC Flow**:
-- **End-to-end authentication**: 0.181ms
+- **End-to-end authentication**: 0.344 ms
 - **Breakdown**:
   - User authentication: 0.005ms
   - Authorization code generation: 0.002ms
-  - Token exchange: 0.090ms
-  - ID Token verification: 0.045ms
-  - UserInfo retrieval: 0.039ms
+  - Token exchange: 0.160ms
+  - ID Token verification: 0.080ms
+  - UserInfo retrieval: 0.097ms
 
 #### 4.2.3 Performance Analysis
 
 **Key Findings**:
 
 1. **KEMTLS is Extremely Fast**:
-   - 0.040ms complete handshake
-   - **50x faster than PQ-TLS** (literature: 1-2ms)
+   - 0.069ms complete handshake
+   - **25-30x faster than PQ-TLS** (literature: 1-2ms)
    - **Why**: KEM operations faster than signatures, fewer round-trips
 
 2. **Algorithm Trade-offs**:
-   - ML-DSA-44: Best speed (0.063ms sign)
-   - Falcon-512: Best size (656 bytes signature)
+   - ML-DSA-44: Best speed (0.129ms sign)
+   - Falcon-512: Best size (657 bytes signature)
    - **Insight**: Choose based on constraints (bandwidth vs latency)
 
 3. **Real-Time Feasible**:
-   - Complete authentication in 0.18ms
+   - Complete authentication in 0.34ms
    - Can handle thousands of authentications per second
    - **Conclusion**: Ready for production deployment
 
@@ -601,8 +601,8 @@ def benchmark_operation(operation, iterations=100):
 - Token sizes: ~3-5KB
 
 **Our KEMTLS Implementation**:
-- Handshake: 0.04ms (**25-50x faster**)
-- Authentication flow: 0.18ms (**28-55x faster**)
+- Handshake: 0.07ms (**15-30x faster**)
+- Authentication flow: 0.34ms (**15-30x faster**)
 - Token sizes: 3.5KB (comparable)
 
 **Why Faster?**:
@@ -636,9 +636,9 @@ def benchmark_operation(operation, iterations=100):
 
 **Single Server Capacity** (estimated):
 
-- KEMTLS handshakes: 25,000/second (0.04ms each)
-- JWT operations: 10,000/second (0.1ms each)
-- Complete OIDC flows: 5,500/second (0.18ms each)
+- KEMTLS handshakes: 14,000/second (0.07ms each)
+- JWT operations: 7,000/second (0.14ms each)
+- Complete OIDC flows: 2,900/second (0.34ms each)
 
 **Conclusion**: Single server handles thousands of users - scalable for most applications.
 
