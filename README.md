@@ -23,7 +23,7 @@ Unlike existing Post-Quantum OIDC implementations that use conventional TLS hand
 - Reduces handshake overhead compared to PQ-TLS
 - Eliminates certificate chain validation complexity
 
-**Result**: ~50x faster authentication compared to PQ-TLS implementations (0.04ms vs 1-2ms handshake)
+**Performance**: Achieves 15-30x faster authentication compared to PQ-TLS implementations documented in literature (0.07ms vs 1-2ms handshake)
 
 ---
 
@@ -188,9 +188,9 @@ source setup_env.sh
 
 ## 🎮 Running the Project - All Options
 
-### ⭐ OPTION A: Interactive Web UI (Recommended - Best for Judges)
+### OPTION A: Interactive Web Interface
 
-**Start the web interface with live demonstrations:**
+**Launch the web-based demonstration interface:**
 
 ```bash
 cd ~/PQC
@@ -200,22 +200,22 @@ python ui/app.py
 
 Then open your browser to: **http://localhost:5000**
 
-**Available Interactive Demos:**
-1. **Dashboard** - Project overview and quick links
-2. **KEMTLS Handshake** - Live handshake demonstration with timing
-3. **Digital Signatures** - Test all PQ signature algorithms (ML-DSA, Falcon)
-4. **JWT Operations** - Create and verify PQ-signed JWTs
-5. **Complete OIDC Flow** - End-to-end authentication demonstration
-6. **Benchmarks** - View all performance data interactively
-7. **Architecture** - System design visualization
+**Available Demonstrations:**
+1. **Dashboard** - Project overview and navigation
+2. **KEMTLS Handshake** - Interactive handshake demonstration with performance metrics
+3. **Digital Signatures** - Testing interface for all PQ signature algorithms (ML-DSA, Falcon)
+4. **JWT Operations** - Token creation and verification with post-quantum signatures
+5. **Complete OIDC Flow** - End-to-end authentication flow demonstration
+6. **Benchmarks** - Interactive performance data visualization
+7. **Architecture** - System architecture and component overview
 
-**All operations run live with real cryptography!**
+**Note**: All cryptographic operations are executed in real-time using liboqs implementation.
 
 ---
 
-### 🧪 OPTION B: Run All Tests (Verify Everything Works)
+### OPTION B: Cryptographic Test Suite
 
-**Test all cryptographic operations:**
+**Execute comprehensive cryptographic validation:**
 
 ```bash
 cd ~/PQC
@@ -234,9 +234,9 @@ python src/pq_crypto/test_crypto.py
 
 ---
 
-### 📊 OPTION C: Generate Fresh Benchmark Data
+### OPTION C: Performance Benchmark Generation
 
-**Run complete performance benchmarks (32 operations):**
+**Execute complete benchmark suite (32 operations):**
 
 ```bash
 cd ~/PQC
@@ -261,9 +261,9 @@ python -m src.benchmarks.run_benchmarks
 
 ---
 
-### 📈 OPTION D: Generate Benchmark PDF Report
+### OPTION D: PDF Report Generation
 
-**Create visual performance report with graphs:**
+**Generate comprehensive performance analysis report:**
 
 ```bash
 cd ~/PQC
@@ -284,9 +284,9 @@ python -m src.benchmarks.generate_pdf_report
 
 ---
 
-### 🎯 OPTION E: Individual Demo Scripts
+### OPTION E: Individual Demonstration Scripts
 
-**Run specific demonstrations:**
+**Execute specific demonstration modules:**
 
 #### 1. **Complete OIDC Authentication Flow**
 ```bash
@@ -322,9 +322,9 @@ Rapid test of all major components (< 5 seconds).
 
 ---
 
-### 🔬 OPTION F: Test UI Endpoints (Verify Web API)
+### OPTION F: Web API Endpoint Validation
 
-**Test all Flask API endpoints:**
+**Validate all Flask REST API endpoints:**
 
 ```bash
 cd ~/PQC
@@ -346,9 +346,9 @@ python test_ui_endpoints.py
 
 ---
 
-### 📖 OPTION G: View Existing Benchmark Data
+### OPTION G: Benchmark Data Inspection
 
-**See pre-generated performance results without re-running:**
+**Access pre-generated performance results:**
 
 #### View JSON data:
 ```bash
@@ -372,9 +372,9 @@ xdg-open BenchmarkResults.pdf
 
 ---
 
-## 🎬 OPTION H: Complete Demonstration Sequence
+## OPTION H: Complete Evaluation Sequence
 
-**Run everything in order (recommended for thorough evaluation):**
+**Execute comprehensive demonstration workflow:**
 
 ```bash
 cd ~/PQC
@@ -500,17 +500,17 @@ cd ~/PQC && tree -L 2 -I 'venv|__pycache__|.git'
 
 ---
 
-## � Quick Summary for Judges
+## Evaluation Guide
 
-### Fastest Way to See Everything:
+### Rapid Deployment Instructions:
 
-**1. Start Web UI (30 seconds):**
+**1. Launch Web Interface (30 seconds):**
 ```bash
 cd ~/PQC && source setup_env.sh && python ui/app.py
 ```
-Open http://localhost:5000 - See all features interactively!
+Access http://localhost:5000 for interactive feature demonstration.
 
-**2. Generate Everything (2 minutes):**
+**2. Complete Data Generation (2 minutes):**
 ```bash
 cd ~/PQC && source setup_env.sh
 python src/pq_crypto/test_crypto.py              # Run tests
@@ -518,11 +518,11 @@ python -m src.benchmarks.run_benchmarks          # Generate data
 python -m src.benchmarks.generate_pdf_report     # Create PDF
 ```
 
-**3. View Results:**
-- **Web UI**: http://localhost:5000 (live demos)
-- **PDF Report**: `BenchmarkResults.pdf` (graphs + analysis)
-- **Raw Data**: `benchmark_results/*.json` and `*.csv`
-- **Technical Doc**: `TechnicalDocumentation.md` (8,500 words)
+**3. Results and Documentation:**
+- **Web Interface**: http://localhost:5000 (interactive demonstrations)
+- **PDF Report**: `BenchmarkResults.pdf` (graphical analysis and performance tables)
+- **Raw Data**: `benchmark_results/*.json` and `*.csv` (structured performance metrics)
+- **Technical Documentation**: `TechnicalDocumentation.md` (comprehensive 8,500-word guide)
 
 ### What Each Option Does:
 

@@ -27,18 +27,18 @@
 
 This project implements a **quantum-resistant OpenID Connect (OIDC) authentication system** using **KEMTLS** (Key Encapsulation Mechanism Transport Layer Security) and **NIST-standardized post-quantum cryptographic algorithms**.
 
-### 1.2 Key Innovations
+### 1.2 Key Contributions
 
-1. **First KEMTLS-based OIDC implementation** - Previous work used PQ-TLS
-2. **50x performance improvement** over PQ-TLS approaches (0.04ms vs 1-2ms handshake)
-3. **Complete quantum resistance** - Zero classical cryptography (no RSA, no ECC)
-4. **Full OIDC compliance** - Standard protocol unchanged at application layer
+1. **Novel KEMTLS-based OIDC implementation** - First implementation utilizing KEMTLS protocol instead of conventional PQ-TLS
+2. **Significant performance improvement** - Demonstrates 15-30x performance advantage over PQ-TLS approaches documented in literature (0.07ms vs 1-2ms handshake)
+3. **Complete quantum resistance** - Utilizes exclusively post-quantum cryptographic primitives (no RSA, no ECC)
+4. **Protocol compliance** - Maintains full OIDC Core 1.0 specification compliance at application layer
 
 ### 1.3 Technical Specifications
 
 - **Code**: 4,583 lines of Python across 19 modules
 - **Algorithms**: Kyber (KEM), ML-DSA/Falcon (Signatures)
-- **Performance**: 0.04ms handshake, 0.18ms complete authentication
+- **Performance**: 0.069ms handshake, 0.344ms complete authentication
 - **Standards**: NIST FIPS 203/204/205, OpenID Connect Core 1.0
 
 ---
@@ -82,47 +82,47 @@ The system follows a clean layered architecture separating concerns:
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### 2.2 Architecture Rationale
+### 2.2 Design Rationale
 
-#### Why Layered Design?
+#### Layered Architecture Benefits
 
-**Reason 1: Separation of Concerns**
-- Transport security (KEMTLS) is independent of application logic (OIDC)
-- Can update cryptographic algorithms without changing OIDC protocol
-- Easier to test, maintain, and audit
+**Separation of Concerns**
+- Transport security (KEMTLS) maintains independence from application logic (OIDC)
+- Cryptographic algorithm updates possible without OIDC protocol modifications
+- Simplified testing, maintenance, and security auditing
 
-**Reason 2: Protocol Compliance**
-- OIDC specification requires protocol semantics remain unchanged
-- Only transport and cryptographic layers modified for post-quantum security
-- Maintains compatibility with OIDC ecosystem
+**Protocol Compliance**
+- OIDC specification requires unchanged protocol semantics
+- Post-quantum modifications isolated to transport and cryptographic layers
+- Maintains compatibility within existing OIDC ecosystem
 
-**Reason 3: Modularity**
-- Each layer has clear interfaces
-- Can replace KEMTLS with different transport if needed
-- Can swap signature algorithms without touching OIDC logic
+**Modularity**
+- Well-defined interfaces between layers
+- Alternative transport mechanisms can be substituted without application-layer changes
+- Signature algorithm substitution possible without affecting OIDC implementation
 
 ### 2.3 Component Architecture
 
 #### 2.3.1 Core Components
 
-**Component 1: PQ Cryptography Module** (`src/pq_crypto/`)
-- **Purpose**: Wrapper around liboqs for post-quantum operations
+**Component 1: Post-Quantum Cryptography Module** (`src/pq_crypto/`)
+- **Function**: Provides abstraction layer for liboqs post-quantum operations
 - **Files**: 
   - `kem.py` - Kyber KEM operations
   - `signature.py` - ML-DSA and Falcon signatures
   - `utils.py` - Key derivation, hashing, encoding
 - **Design**: Clean Python API hiding C library complexity
 
-**Component 2: KEMTLS Protocol** (`src/kemtls/`)
-- **Purpose**: KEM-based transport security
+**Component 2: KEMTLS Protocol Implementation** (`src/kemtls/`)
+- **Function**: Implements KEM-based transport security protocol
 - **Files**:
   - `protocol.py` - Message types, state machine, certificates
   - `server.py` - KEMTLS server implementation
   - `client.py` - KEMTLS client implementation
 - **Design**: State machine following IACR eprint 2020/534 specification
 
-**Component 3: OIDC Implementation** (`src/oidc/`)
-- **Purpose**: OpenID Connect authorization server and client
+**Component 3: OpenID Connect Implementation** (`src/oidc/`)
+- **Function**: Complete OIDC authorization server and relying party implementation
 - **Files**:
   - `server.py` - Authorization server (endpoints, token generation)
   - `client.py` - Relying party (authentication flow)
@@ -130,8 +130,8 @@ The system follows a clean layered architecture separating concerns:
   - `models.py` - Data structures (User, Client, Token)
 - **Design**: Standard OIDC 1.0 implementation with PQ signatures
 
-**Component 4: Benchmarking Suite** (`src/benchmarks/`)
-- **Purpose**: Performance measurement and analysis
+**Component 4: Performance Benchmarking Suite** (`src/benchmarks/`)
+- **Function**: Comprehensive performance measurement and statistical analysis
 - **Files**:
   - `run_benchmarks.py` - Benchmark execution
   - `generate_pdf_report.py` - Report generation
@@ -167,48 +167,48 @@ Total time: 0.18ms
 
 ## 3. Cryptographic Design Choices and Rationale
 
-### 3.1 Why KEMTLS Instead of PQ-TLS?
+### 3.1 KEMTLS Selection Rationale
 
 #### Decision Context
 
-**Problem**: TLS relies on signatures for key exchange, which:
-- Is less efficient with post-quantum algorithms (large signatures)
-- Requires certificate chain validation
+**Challenge**: TLS dependence on signatures for key exchange presents limitations:
+- Reduced efficiency with post-quantum algorithms due to large signature sizes
+- Certificate chain validation overhead
 - Multiple round-trips increase latency
 
-**Alternative Approaches**:
-1. **PQ-TLS**: Replace RSA/ECDSA with PQ algorithms in standard TLS
-2. **KEMTLS**: Replace signature-based handshake with KEM-based handshake
+**Evaluated Approaches**:
+1. **PQ-TLS**: Direct substitution of RSA/ECDSA with post-quantum algorithms in standard TLS
+2. **KEMTLS**: Signature-based handshake replacement with KEM-based alternative
 
-#### Our Choice: KEMTLS
+#### Selected Approach: KEMTLS
 
-**Reasons**:
+**Technical Justification**:
 
-1. **Performance**: 50x faster handshake
-   - PQ-TLS: 1-2ms (from literature)
-   - KEMTLS: 0.04ms (our measurement)
-   - **Why**: KEM operations are faster than signature operations
+1. **Performance Optimization**: Demonstrates superior handshake performance
+   - PQ-TLS: 1-2ms (documented in literature)
+   - KEMTLS: 0.069ms (measured)
+   - **Rationale**: KEM operations exhibit lower computational complexity than signature operations
 
-2. **Simpler Protocol**: 
-   - No certificate chains to validate
-   - Fewer round-trips
-   - Direct key encapsulation
-   - **Why**: Reduces complexity and attack surface
+2. **Protocol Simplification**: 
+   - Eliminates certificate chain validation requirements
+   - Reduces round-trip communications
+   - Direct key encapsulation mechanism
+   - **Rationale**: Reduced complexity minimizes attack surface
 
-3. **Forward Secrecy by Design**:
-   - Ephemeral KEM keys used per session
-   - Old sessions remain secure even if long-term keys compromised
-   - **Why**: Stronger security guarantees
+3. **Forward Secrecy**:
+   - Ephemeral KEM keys generated per session
+   - Historical session security maintained despite long-term key compromise
+   - **Rationale**: Stronger cryptographic security guarantees
 
-4. **Better for Post-Quantum**:
-   - KEMs naturally suited for PQ algorithms
-   - Signature operations relegated to authentication only
-   - **Why**: Plays to strengths of PQ primitives
+4. **Post-Quantum Optimization**:
+   - KEMs architecturally suited for post-quantum algorithms
+   - Signature operations relegated to authentication exclusively
+   - **Rationale**: Leverages inherent strengths of post-quantum primitives
 
-**Trade-offs**:
-- ❌ Less mature than TLS (KEMTLS is newer)
-- ❌ Requires custom implementation (no standard libraries yet)
-- ✅ But: Significant performance and security advantages
+**Implementation Considerations**:
+- Protocol maturity: KEMTLS represents newer protocol compared to TLS
+- Implementation requirements: Custom implementation necessary (limited standard library support)
+- Assessment: Performance and security advantages justify implementation complexity
 
 ### 3.2 Algorithm Selection
 
@@ -237,17 +237,17 @@ Total time: 0.18ms
 3. **Security Basis**:
    - Based on Module Learning With Errors (Module-LWE)
    - Conservative security assumptions
-   - **Why**: Well-studied mathematical foundation
+   - **Rationale**: Well-studied mathematical foundation resistant to known quantum attacks
 
-4. **Message Sizes**:
+4. **Communication Overhead**:
    - Kyber768 public key: 1,184 bytes
    - Kyber768 ciphertext: 1,088 bytes
-   - **Why**: Acceptable for modern networks
+   - **Assessment**: Acceptable for modern network infrastructure
 
-**Why Not Alternatives?**:
-- Classic McEliece: Too large keys (>1MB)
-- NTRU: Not NIST first choice
-- SIKE: Broken (Castryck-Decru attack)
+**Alternative Algorithms**:
+- Classic McEliece: Excessive key sizes (>1MB) unsuitable for practical deployment
+- NTRU: Not selected as NIST primary recommendation
+- SIKE: Cryptanalytic break demonstrated (Castryck-Decru attack, 2022)
 
 #### 3.2.2 Digital Signatures
 
@@ -256,58 +256,58 @@ Total time: 0.18ms
 **Variants Supported**:
 
 **ML-DSA (NIST FIPS 204)**:
-- ML-DSA-44 (NIST Level 2) ⭐ **Recommended for general use**
+- ML-DSA-44 (NIST Level 2) - General-purpose applications
 - ML-DSA-65 (NIST Level 3)
 - ML-DSA-87 (NIST Level 5)
 
 **Falcon (NIST FIPS 205)**:
-- Falcon-512 (NIST Level 1) ⭐ **Recommended for size-constrained**
+- Falcon-512 (NIST Level 1) - Size-constrained environments
 - Falcon-1024 (NIST Level 5)
 
-**Rationale**:
+**Selection Rationale**:
 
-1. **Why ML-DSA?**
-   - **Speed**: 0.063ms sign, 0.028ms verify (ML-DSA-44)
-   - **Simplicity**: Easier to implement correctly
-   - **Deterministic**: No floating-point operations
-   - **Use case**: General-purpose signing (ID tokens, certificates)
+1. **ML-DSA Characteristics**:
+   - **Performance**: 0.129ms signing, 0.044ms verification (ML-DSA-44)
+   - **Implementation**: Simpler implementation with deterministic behavior
+   - **Architecture**: No floating-point operations required
+   - **Application**: General-purpose digital signatures (ID tokens, certificates)
 
-2. **Why Falcon?**
-   - **Compact**: 656 bytes signatures (vs 2420 for ML-DSA-44)
-   - **Fast verification**: 0.034ms
-   - **Use case**: Bandwidth-constrained environments (mobile, IoT)
-   - **Trade-off**: Slower keygen (5ms) but infrequent operation
+2. **Falcon Characteristics**:
+   - **Compactness**: 657 bytes signature size (compared to 2,420 bytes for ML-DSA-44)
+   - **Verification Performance**: 0.059ms
+   - **Application**: Bandwidth-constrained environments (mobile, IoT)
+   - **Consideration**: Higher keygen latency (8.850ms) acceptable for infrequent operation
 
-3. **Why Both?**
-   - **Flexibility**: Different use cases need different trade-offs
-   - **Algorithm agility**: Can switch based on requirements
-   - **Redundancy**: If one algorithm broken, can fallback to other
+3. **Dual Algorithm Support**:
+   - **Flexibility**: Optimization for different deployment constraints
+   - **Algorithm Agility**: Runtime selection based on requirements
+   - **Redundancy**: Cryptographic fallback mechanism if vulnerability discovered
 
 **Performance Comparison**:
 
-| Algorithm | Keygen | Sign | Verify | Sig Size | Best For |
-|-----------|--------|------|--------|----------|----------|
-| ML-DSA-44 | 0.026ms | 0.063ms | 0.028ms | 2,420 bytes | Speed |
-| ML-DSA-65 | 0.045ms | 0.099ms | 0.043ms | 3,309 bytes | Security |
-| Falcon-512 | 5.094ms | 0.177ms | 0.034ms | 656 bytes | Size |
-| Falcon-1024 | 15.967ms | 0.349ms | 0.065ms | 1,263 bytes | Max Security |
+| Algorithm | Keygen | Sign | Verify | Sig Size | Primary Use Case |
+|-----------|--------|------|--------|----------|------------------|
+| ML-DSA-44 | 0.049ms | 0.129ms | 0.044ms | 2,420 bytes | Performance |
+| ML-DSA-65 | 0.075ms | 0.195ms | 0.071ms | 3,309 bytes | Security |
+| Falcon-512 | 8.850ms | 0.305ms | 0.059ms | 657 bytes | Size-constrained |
+| Falcon-1024 | 26.538ms | 0.603ms | 0.113ms | 1,263 bytes | Maximum Security |
 
-**Why Not Alternatives?**:
-- SPHINCS+: Too slow (seconds per signature)
-- Rainbow: Broken (Beullens attack)
+**Alternative Algorithms**:
+- SPHINCS+: Performance unsuitable for real-time applications (signing latency in seconds)
+- Rainbow: Cryptanalytic break demonstrated (Beullens attack, 2022)
 
 #### 3.2.3 Symmetric Cryptography
 
-**Selected**: AES-256-GCM
+**Selected Algorithm**: AES-256-GCM
 
-**Rationale**:
-1. **Quantum-Safe**: Symmetric crypto with sufficient key length resists quantum attacks
-2. **AEAD**: Authenticated Encryption with Associated Data (integrity + confidentiality)
-3. **Hardware Support**: AES-NI instructions on modern CPUs
-4. **Standard**: Widely used and trusted
+**Selection Rationale**:
+1. **Quantum Resistance**: Symmetric cryptography with 256-bit key length maintains security against quantum attacks
+2. **AEAD Properties**: Authenticated Encryption with Associated Data provides both integrity and confidentiality
+3. **Hardware Acceleration**: AES-NI instruction set support available on modern processors
+4. **Standardization**: Widely deployed and extensively analyzed algorithm
 
 **Key Derivation**: HKDF-SHA256
-- SHA-256 remains secure against quantum computers (Grover's algorithm only provides √n speedup)
+- SHA-256 maintains quantum resistance (Grover's algorithm provides only quadratic speedup, √n)
 - Standard key derivation function
 
 ### 3.3 Security Parameter Selection
