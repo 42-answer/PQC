@@ -137,9 +137,9 @@ cd ~
 git clone -b main https://github.com/open-quantum-safe/liboqs.git
 cd liboqs
 
-# Build liboqs
+# Build liboqs (with shared library support)
 mkdir build && cd build
-cmake -GNinja -DCMAKE_INSTALL_PREFIX=/usr/local ..
+cmake -GNinja -DCMAKE_INSTALL_PREFIX=/usr/local -DBUILD_SHARED_LIBS=ON ..
 ninja
 
 # Install liboqs
@@ -148,7 +148,7 @@ sudo ldconfig
 
 # Verify installation
 ls /usr/local/lib/liboqs*
-# Should show: /usr/local/lib/liboqs.so.5
+# Should show: /usr/local/lib/liboqs.so (or liboqs.so.5)
 ```
 
 **Expected result**: You should see `liboqs.so.5` file listed.
