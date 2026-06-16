@@ -9,26 +9,24 @@
 
 ## 🎯 Project Overview
 
-This project implements **OpenID Connect (OIDC) authentication with complete post-quantum security** by:
+This repository is a **research/demo prototype** that explores how post-quantum (PQ) primitives could be composed into an OIDC-style identity flow.
 
-1. **Replacing TLS with KEMTLS** - A novel KEM-based transport protocol offering forward secrecy without certificate chains
-2. **Using NIST-standardized post-quantum signatures** - ML-DSA (Dilithium) and Falcon for all digital signatures
-3. **Maintaining OIDC protocol compliance** - Standard OAuth 2.0 and OIDC 1.0 flows preserved at application layer
+What it includes (repository-grounded):
+1. **Post-quantum primitives via liboqs**: ML-KEM (Kyber) and PQ signature algorithms exposed through Python wrappers and benchmarks.
+2. **A KEMTLS-style key-establishment workflow**: key encapsulation/decapsulation + HKDF-based key derivation (used in benchmarks and demos).
+3. **An OIDC-inspired authorization-code demo flow**: issues and verifies PQ-signed ID tokens inside an in-process demo server, exposed via a Flask UI.
 
-### 🔐 Key Innovation: KEMTLS over PQ-TLS
+Important scope notes:
+- This is **not a full TLS 1.3 implementation** and does **not** provide production-grade transport security.
+- The OIDC pieces are **demo/simplified**; do not treat them as full OIDC Core compliance.
 
-Unlike existing Post-Quantum OIDC implementations [1] that use conventional TLS handshakes with PQ algorithms, this project uses **KEMTLS** - a more efficient alternative that:
+### 🔐 KEMTLS (Concept) vs what this repo measures
+
+KEMTLS (as a research idea) replaces handshake signatures with KEM operations. This repository implements a **KEMTLS-style workflow** and benchmarks a **key-establishment simulation** that:
 - Replaces certificate-based key exchange with Key Encapsulation Mechanisms (KEMs)
-- Provides inherent forward secrecy without ephemeral Diffie-Hellman
-- Reduces handshake overhead compared to PQ-TLS
-- Eliminates certificate chain validation complexity
+- Uses HKDF to derive session keys from the shared secret
 
-**Performance Comparison**: Achieves **15-30x faster authentication** compared to PQ-TLS implementations:
-- **This work (KEMTLS)**: ~0.07ms handshake
-- **Schardong et al. [1] (PQ-TLS)**: 1-2ms handshake
-- **Speedup**: 14-29x improvement
-
-> [1] Schardong, F., Custódio, R., & Perin, L. P. (2023). **Post-Quantum OpenID Connect**. In *Proceedings of the IEEE/ACM Conference on Security and Privacy*.
+The measured timings in `benchmark_results/` are **in-process microbenchmarks**; they should not be interpreted as full network handshake latency, and this README does not claim cross-project speedups.
 
 ---
 
@@ -55,14 +53,14 @@ Unlike existing Post-Quantum OIDC implementations [1] that use conventional TLS 
 │  Layer 2: KEMTLS Protocol (Replaces TLS)                    │
 │  • KEM-based Handshake (Kyber)                              │
 │  • Session Key Derivation (HKDF)                            │
-│  • Encrypted Communication (AES-256-GCM)                    │
+│  • (Demo) Session keys derived; transport encryption is not implemented here │
 └─────────────────────────────────────────────────────────────┘
                           ↕
 ┌─────────────────────────────────────────────────────────────┐
 │  Layer 1: Post-Quantum Cryptographic Primitives             │
 │  • Kyber KEM (NIST FIPS 203 - ML-KEM)                       │
 │  • ML-DSA Signatures (NIST FIPS 204 - Dilithium)            │
-│  • Falcon Signatures (NIST FIPS 205)                        │
+│  • Falcon signatures (available via liboqs; not a NIST FIPS standard) │
 │  • liboqs Integration                                       │
 └─────────────────────────────────────────────────────────────┘
 ```
@@ -78,7 +76,7 @@ Wrappers for NIST-standardized post-quantum algorithms:
 - **Utilities**: Key derivation, hashing, nonce generation
 
 ### 2. **KEMTLS Implementation** (`src/kemtls/`)
-Complete KEM-based TLS alternative:
+Prototype KEMTLS-style components (demo / educational):
 - Protocol state machine (CLIENT_HELLO, SERVER_HELLO, etc.)
 - Server and client implementations
 - Certificate format with PQ keys
@@ -92,7 +90,7 @@ JWT/JWS with post-quantum signatures:
 - Claims validation
 
 ### 4. **OIDC Server** (`src/oidc/server.py`)
-Full OpenID Connect Provider:
+In-memory OIDC-inspired demo server:
 - Authorization endpoint
 - Token endpoint
 - UserInfo endpoint
@@ -100,11 +98,11 @@ Full OpenID Connect Provider:
 - User management
 
 ### 5. **OIDC Client** (`src/oidc/client.py`)
-Relying Party implementation:
+Relying party demo client:
 - Authorization flow initiation
 - Token exchange
 - Token verification
-- UserInfo retrieval
+- UserInfo retrieval is not implemented in the demo client
 
 ### 6. **Benchmarking Suite** (`src/benchmarks/`)
 Comprehensive performance measurement:
@@ -318,7 +316,7 @@ python -m src.benchmarks.run_benchmarks
 - Benchmarks 6 JWT operations (create/verify with different algorithms)
 - Benchmarks complete KEMTLS handshake
 - Benchmarks end-to-end OIDC authentication flow
-- Runs 100 iterations per operation for statistical accuracy
+- Uses 100 iterations by default for microbenchmarks (see `src/benchmarks/run_benchmarks.py`)
 - Saves results to `benchmark_results/` directory
 
 **Generated files:**
@@ -537,9 +535,7 @@ sudo ldconfig       # Update library cache
 
 ### Issue: Port 5000 already in use
 ```bash
-# Solution: Use different port
-python ui/app.py --port 5001
-# Then open: http://localhost:5001
+# Solution: change the port in ui/app.py (look for app.run(..., port=5000))
 ```
 
 ---
@@ -620,36 +616,17 @@ python -m src.benchmarks.generate_pdf_report     # Create PDF
 
 ---
 
-## �📊 Performance Results
+## 📊 Performance Results (from stored artifacts)
 
-Based on 100 iterations per operation (latest benchmark run):
+All numbers should be taken from the checked-in artifacts in [benchmark_results/](benchmark_results/):
+- [benchmark_results/benchmark_results.csv](benchmark_results/benchmark_results.csv)
+- [benchmark_results/benchmark_results.json](benchmark_results/benchmark_results.json)
 
-| Operation | Algorithm | Latency | Size |
-|-----------|-----------|---------|------|
-| **KEMTLS Handshake** | Kyber512 + ML-DSA-44 | **0.069 ms** | 3,680 bytes |
-| **JWT Creation** | ML-DSA-44 | 0.140 ms | 3.5 KB |
-| **JWT Verification** | ML-DSA-44 | 0.076 ms | - |
-| **Complete OIDC Flow** | End-to-end | **0.344 ms** | - |
-| **KEM Operations** | Kyber768 | 0.035 ms | 1,088 bytes |
-| **Signature** | Falcon-512 | 0.305 ms | **657 bytes** (smallest!) |
+From the current checked-in CSV (in-process microbenchmarks):
+- **Full KEMTLS Handshake** (simulation): ~0.0409 ms mean (50 iterations)
+- **End-to-End OIDC Flow** (in-process demo sequence): ~0.2049 ms mean (20 iterations)
 
-**Key Findings**:
-- ✅ **KEMTLS handshake is 14-29x faster than PQ-TLS** [1]: 0.069ms vs 1-2ms
-- ✅ **Complete OIDC authentication in <0.35ms** (vs. 144x slower classical TLS: 50-100ms for RSA-2048)
-- ✅ Falcon-512 produces smallest signatures (656 bytes vs 2420 for ML-DSA-44)
-- ✅ ML-DSA-44 offers best speed-to-size tradeoff for general use
-
-**Comparison with Related Work**:
-| Implementation | Transport Protocol | Handshake Time | Reference |
-|----------------|-------------------|----------------|-----------|
-| **This work** | KEMTLS | **0.069 ms** | - |
-| Schardong et al. | PQ-TLS 1.3 | 1-2 ms | [1] |
-| Classical TLS | RSA-2048 | 50-100 ms | Baseline |
-| **Speedup** | vs PQ-TLS | **14-29x** | - |
-
-> [1] Schardong, F., Custódio, R., & Perin, L. P. (2023). Post-Quantum OpenID Connect. IEEE/ACM Conference on Security and Privacy.
-
-See [`benchmark_results/`](benchmark_results/) for full data and [`BenchmarkResults.pdf`](BenchmarkResults.pdf) for detailed analysis.
+For plots and tables, use the LaTeX report pipeline in [report/](report/).
 
 ---
 
@@ -725,10 +702,10 @@ PQC/
 
 ## 🔐 Security Features
 
-### ✅ Quantum Resistance
-- **Zero classical cryptography** - No RSA, no ECC, no Diffie-Hellman
-- **NIST-standardized algorithms only** - ML-KEM, ML-DSA, Falcon
-- **Post-quantum by design** - Resistant to both classical and quantum attacks
+### ✅ Post-Quantum Primitives (Scope)
+- Focuses on **PQ public-key primitives** for KEM and signatures (no RSA/ECC/DH in the core demo paths).
+- Uses **ML-KEM (FIPS 203)** and **ML-DSA (FIPS 204)** via liboqs.
+- Includes Falcon via liboqs for experimentation; it is **not** a NIST FIPS-standard algorithm.
 
 ### ✅ Forward Secrecy
 - **Ephemeral KEM keys** - New keypair for each handshake
@@ -740,33 +717,30 @@ PQC/
 - **ID token signatures** - User identity cryptographically signed
 - **Token verification** - Signature validation before access grant
 
-### ✅ Protocol Compliance
-- **OpenID Connect Core 1.0** - Full specification compliance
-- **OAuth 2.0** - Standard authorization code flow
-- **JWT RFC 7519** - Compatible token format
-- **JWS RFC 7515** - Standard signature format (with PQ algorithms)
+### ✅ Protocol Alignment (Demo)
+- Uses an **authorization-code style** sequence inspired by OAuth 2.0 / OIDC.
+- Uses JWT/JWS containers (RFC 7519 / 7515) with PQ signature algorithms.
+- Some endpoints/steps (notably UserInfo) are simplified for demo purposes.
 
 ---
 
 ## 🧪 Testing & Verification
 
-### Comprehensive Test Suite
+This repo contains lightweight demo validations rather than a full unit-test suite.
+
+Useful checks:
 ```bash
-# Run all tests (20 test cases)
-python -m tests.test_all
+source setup_env.sh
+
+# Crypto sanity checks
+python src/pq_crypto/test_crypto.py
+
+# Start UI (terminal 1)
+python ui/app.py
+
+# Smoke-test UI JSON endpoints (terminal 2)
+python test_ui_endpoints.py
 ```
-
-**Test Coverage**:
-- ✅ Cryptographic operations (KEM, signatures)
-- ✅ KEMTLS handshake protocol
-- ✅ JWT creation and verification
-- ✅ OIDC authorization flow
-- ✅ Token exchange
-- ✅ UserInfo retrieval
-- ✅ Error handling
-- ✅ Edge cases
-
-**All tests passing**: ✅ 20/20 (100%)
 
 ---
 
@@ -818,11 +792,13 @@ python -m src.benchmarks.generate_pdf_report
 
 | Algorithm | Security Level | Public Key | Signature | Keygen | Sign | Verify |
 |-----------|----------------|------------|-----------|--------|------|--------|
-| **ML-DSA-44** ⭐ | NIST Level 2 | 1,312 bytes | 2,420 bytes | 0.026ms | 0.063ms | 0.028ms |
-| **ML-DSA-65** | NIST Level 3 | 1,952 bytes | 3,309 bytes | 0.045ms | 0.099ms | 0.043ms |
-| **ML-DSA-87** | NIST Level 5 | 2,592 bytes | 4,627 bytes | 0.067ms | 0.133ms | 0.064ms |
-| **Falcon-512** 🪶 | NIST Level 1 | 897 bytes | **656 bytes** | 5.094ms | 0.177ms | 0.034ms |
-| **Falcon-1024** | NIST Level 5 | 1,793 bytes | 1,263 bytes | 15.967ms | 0.349ms | 0.065ms |
+| **ML-DSA-44** ⭐ | NIST Level 2 | 1,312 bytes | 2,420 bytes | 0.0325ms | 0.0711ms | 0.0262ms |
+| **ML-DSA-65** | NIST Level 3 | 1,952 bytes | 3,309 bytes | 0.0500ms | 0.2138ms | 0.0431ms |
+| **ML-DSA-87** | NIST Level 5 | 2,592 bytes | 4,627 bytes | 0.0683ms | 0.2884ms | 0.0893ms |
+| **Falcon-512** 🪶 | NIST Level 1 | 897 bytes | **656 bytes** | 5.3442ms | 0.2212ms | 0.0440ms |
+| **Falcon-1024** | NIST Level 5 | 1,793 bytes | 1,269 bytes | 15.8008ms | 0.3607ms | 0.0655ms |
+
+Note: Falcon is included for comparison via liboqs and stored benchmark artifacts; it is not a NIST FIPS standard.
 
 **Recommendations**:
 - **General use**: **ML-DSA-44** - Fast, NIST Level 2 security
@@ -850,7 +826,7 @@ python -m src.benchmarks.generate_pdf_report
 ## 🔬 Research Background
 
 ### KEMTLS
-This project implements KEMTLS as specified in:
+This project is inspired by KEMTLS and includes KEMTLS-style demo components; see the paper for the full protocol design:
 
 > Schwabe, P., Stebila, D., & Wiggers, T. (2020).  
 > **More Efficient Post-Quantum KEMTLS with Pre-Distributed Public Keys**  
@@ -860,40 +836,23 @@ This project implements KEMTLS as specified in:
 **Key differences from TLS**:
 - Replaces Diffie-Hellman with KEM operations
 - Uses KEM keys in certificates instead of signature keys
-- Reduces round-trips and computational overhead
-- Inherently provides forward secrecy
+- Derives session keys from a shared secret (this repo uses HKDF in the demo/benchmarks)
 
 ### Post-Quantum OIDC
 Implementation builds upon methodology from:
 
 > Schardong, F., Custódio, R., & Perin, L. P. (2023).  
-> **Post-Quantum OpenID Connect**  
-> In *Proceedings of the 2023 IEEE/ACM International Conference on Security and Privacy*  
-> DOI: [Available upon publication]
+> **Post-Quantum OpenID Connect**.
 
-**Comparison with Schardong et al.**:
-
-| Feature | Schardong et al. (2023) | This Work |
-|---------|------------------------|-----------|
-| **Transport Layer** | PQ-TLS 1.3 | KEMTLS |
-| **Handshake Mechanism** | Signature-based (ECDHE + PQ Sig) | KEM-based |
-| **Handshake Time** | 1-2 ms | **0.069 ms** |
-| **Performance Gain** | Baseline | **14-29x faster** |
-| **Forward Secrecy** | Via ephemeral ECDHE | Inherent in KEM |
-| **Certificate Type** | Signature public keys | KEM public keys |
-| **Round Trips** | Standard TLS (2-RTT) | Optimized (1-RTT possible) |
-
-**Our contribution**:
-- First OIDC implementation using KEMTLS (previous work used PQ-TLS)
-- Significant performance improvements through KEM-based transport
-- Modular architecture supporting multiple NIST-standardized algorithms
-- Comprehensive benchmarking suite comparing all PQ algorithms
+This repository is conceptually related (OIDC + PQ primitives), but it does not claim a like-for-like performance comparison against other implementations.
 
 ### NIST Post-Quantum Standardization
-All algorithms are NIST-standardized (August 2024):
+NIST FIPS standards (as of the standardization set used by this repo):
 - **ML-KEM** (Kyber) - FIPS 203
 - **ML-DSA** (Dilithium) - FIPS 204
-- **Falcon** - FIPS 205
+- **SLH-DSA** (SPHINCS+) - FIPS 205
+
+Falcon is referenced as an available algorithm in liboqs and in the benchmark artifacts, but it is not a NIST FIPS standard.
 
 ---
 
@@ -909,7 +868,7 @@ All algorithms are NIST-standardized (August 2024):
 5. **[NIST PQC Project](https://csrc.nist.gov/projects/post-quantum-cryptography)** - Standardization effort
 6. **[NIST FIPS 203](https://csrc.nist.gov/pubs/fips/203/final)** - ML-KEM (Kyber)
 7. **[NIST FIPS 204](https://csrc.nist.gov/pubs/fips/204/final)** - ML-DSA (Dilithium)
-8. **[NIST FIPS 205](https://csrc.nist.gov/pubs/fips/205/final)** - Falcon
+8. **[NIST FIPS 205](https://csrc.nist.gov/pubs/fips/205/final)** - SLH-DSA (SPHINCS+)
 
 ### Implementation Libraries
 9. **[liboqs](https://github.com/open-quantum-safe/liboqs)** - Open Quantum Safe cryptographic library
@@ -949,25 +908,9 @@ February 2026
 
 ## 🎯 Project Status
 
-**Status**: ✅ **COMPLETE AND READY FOR SUBMISSION**
+**Status**: ✅ demo prototype (UI + benchmarks + report pipeline)
 
-| Component | Status | Lines of Code |
-|-----------|--------|---------------|
-| PQ Crypto Wrappers | ✅ Complete | 856 |
-| KEMTLS Protocol | ✅ Complete | 1,247 |
-| OIDC Implementation | ✅ Complete | 1,398 |
-| Benchmarking Suite | ✅ Complete | 512 |
-| Testing | ✅ All Tests Pass | 570 |
-| Documentation | ✅ Complete | 8,500+ words |
-| Web UI | ✅ Complete | 383 + 8 templates |
-| **Total** | **✅ 100%** | **4,583** |
-
-**Deliverables**:
-- ✅ Working prototype (all features functional)
-- ✅ Source code (well-commented, modular)
-- ✅ Technical documentation (comprehensive)
-- ✅ Benchmark report (PDF with graphs)
-- ✅ Interactive UI (live demonstrations)
+This repository is suitable for demonstrations and benchmarking, but it is not production-hardened and does not claim full standards compliance.
 
 ---
 

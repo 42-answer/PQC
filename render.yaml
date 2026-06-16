@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: pqc-oidc-demo
+    runtime: python
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "python ui/app.py"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.0
+      - key: LD_LIBRARY_PATH
+        value: /usr/local/lib:$LD_LIBRARY_PATH

@@ -1,0 +1,17 @@
+\begin{table}[H]
+\caption{JWT creation performance and token sizes.}
+\label{tab:jwt-sizes}
+\centering
+\setlength{\tabcolsep}{3pt}%
+\renewcommand{\arraystretch}{1.05}%
+\resizebox{0.98\columnwidth}{!}{%
+\begin{tabular}{p{3.2cm}rrrp{1.2cm}r}
+\toprule\rowcolor{black!5}
+Algorithm & Mean (ms) & Median (ms) & Stdev (ms) & Iters & Size (B) \\
+\midrule
+Falcon-512 & 0.2461 & 0.2550 & 0.0277 & 100 & 1193 \\
+ML-DSA-44 & 0.0812 & 0.0687 & 0.0342 & 100 & 3549 \\
+ML-DSA-65 & 0.1197 & 0.1074 & 0.0605 & 100 & 4734 \\
+\bottomrule
+\end{tabular}}
+\end{table}

@@ -1,0 +1,16 @@
+\begin{table}[H]
+\caption{Protocol-level benchmark summary.}
+\label{tab:protocol-summary}
+\centering
+\setlength{\tabcolsep}{3pt}%
+\renewcommand{\arraystretch}{1.05}%
+\resizebox{0.98\columnwidth}{!}{%
+\begin{tabular}{p{4.2cm}p{4.4cm}rrrp{1.2cm}}
+\toprule\rowcolor{black!5}
+Operation & Configuration & Mean (ms) & Median (ms) & Stdev (ms) & Iters \\
+\midrule
+End-to-End OIDC Flow & Complete Authorization Code Flow & 0.2049 & 0.1729 & 0.0859 & 20 \\
+Full KEMTLS Handshake & Kyber512 + ML-DSA-44 & 0.0409 & 0.0387 & 0.0129 & 50 \\
+\bottomrule
+\end{tabular}}
+\end{table}
